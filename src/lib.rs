@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 use std::ops;
-use std::ops::Index;
+use std::ops::{Index, IndexMut};
 
 #[derive(Debug, Clone)]
 pub struct Matrix<const ROWS: usize, const COLS: usize> {
@@ -14,6 +14,12 @@ impl<const ROWS: usize, const COLS: usize> Index<(usize, usize)> for Matrix<ROWS
     type Output = f64;
     fn index(&self, index: (usize, usize)) -> &Self::Output {
         &self.matrix[index.0][index.1]
+    }
+}
+
+impl<const ROWS: usize, const COLS: usize> IndexMut<(usize, usize)> for Matrix<ROWS, COLS> {
+    fn index_mut(&mut self, index: (usize, usize)) -> &mut Self::Output {
+        &mut self.matrix[index.0][index.1]
     }
 }
 
@@ -36,7 +42,7 @@ impl<const ROWS: usize> Matrix<ROWS, ROWS> {
     pub fn identity() -> Self {
         let mut ret = Self::zero();
         for i in 0..ROWS {
-            ret.matrix[i][i] = 1.0;
+            ret[(i, i)] = 1.0;
         }
 
         ret
@@ -51,7 +57,7 @@ impl<const ROWS: usize, const COLS: usize> ops::Add<Matrix<ROWS, COLS>> for Matr
 
         for ((i, lhs_row), rhs_row) in self.matrix.iter().enumerate().zip(rhs.matrix.iter()) {
             for ((j, lhs_val), rhs_val) in lhs_row.iter().enumerate().zip(rhs_row.iter()) {
-                ret.matrix[i][j] = lhs_val + rhs_val;
+                ret[(i, j)] = lhs_val + rhs_val;
             }
         }
 
