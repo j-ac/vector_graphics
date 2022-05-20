@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use std::ops;
+use std::ops::Index;
 
 #[derive(Debug, Clone)]
 pub struct Matrix<const ROWS: usize, const COLS: usize> {
@@ -8,6 +9,13 @@ pub struct Matrix<const ROWS: usize, const COLS: usize> {
 
 //Matrix with one column
 type ColumnVector<const SIZE: usize> = Matrix<SIZE, 1>;
+
+impl<const ROWS: usize, const COLS: usize> Index<(usize, usize)> for Matrix<ROWS, COLS> {
+    type Output = f64;
+    fn index(&self, index: (usize, usize)) -> &Self::Output {
+        &self.matrix[index.0][index.1]
+    }
+}
 
 impl<const ROWS: usize, const COLS: usize> Matrix<ROWS, COLS> {
     pub fn zero() -> Self {
@@ -142,12 +150,17 @@ mod tests {
     }
 
     #[test]
-    fn test_matrix_add() {
-        fn matrix_add() {
-            assert_eq!(
-                (Matrix::<2, 2>::ones() + Matrix::<2, 2>::ones()).matrix,
-                [[2.0, 2.0], [2.0, 2.0]]
-            );
-        }
+    fn matrix_index() {
+        let mtx: Matrix<3, 3> = Matrix::<3, 3>::identity();
+        assert_eq!(mtx[(0, 0)], 1.0);
+        assert_eq!(mtx[(2, 1)], 0.0);
+    }
+
+    #[test]
+    fn matrix_add() {
+        assert_eq!(
+            (Matrix::<2, 2>::ones() + Matrix::<2, 2>::ones()).matrix,
+            [[2.0, 2.0], [2.0, 2.0]]
+        );
     }
 }
