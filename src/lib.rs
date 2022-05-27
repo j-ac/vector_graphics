@@ -197,6 +197,14 @@ mod tests {
             ]
         );
     }
+
+    #[test]
+    fn matrix_from() {
+        let input: [[f64; 2]; 3] = [[0.1066, 1066.0], [99.9, 100.0], [12.3, 45.6]];
+        let expected = Matrix { matrix: input };
+        assert_eq!(Matrix::<3, 2>::new(input), expected);
+    }
+
     #[test]
     //this test should not use From() or Into() because it will make the result and expected
     //created by the same function call and it will always pass even on bad input.
