@@ -154,12 +154,12 @@ impl Coordinate3d {
     fn distance(self, cord: Coordinate3d) -> f64 {
         //pythagorean theorem
         //sqrt((x1 + x2)^2 + (y1 + y2)^2 + (z1 + z2)^2)
-        let mut ans: f64 = 0.0;
+        let mut sum_of_squares: f64 = 0.0;
         for axis in 0..3 {
-            ans += (self.pos[(axis, 1)] + cord.pos[(axis, 1)]).powi(2);
+            sum_of_squares += (self.pos[(axis, 1)] + cord.pos[(axis, 1)]).powi(2);
         }
 
-        ans.sqrt()
+        sum_of_squares.sqrt()
     }
 }
 
