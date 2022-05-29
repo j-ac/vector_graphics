@@ -1,16 +1,21 @@
 #![allow(dead_code)]
+#![warn(missing_docs)]
+
+//! This library contains objects to perform the linear algebra neccesary to create
+//! wireframe objects, manipulate, move, and view them in a 3D environment.
+//! This library is a work in progress.
 use std::ops;
 use std::ops::Mul;
 use std::ops::{Index, IndexMut};
 
-///An abstraction over a 2D matrix of f64s. the foundation of this library
+/// An abstraction over a 2D matrix of `f64`s. the foundation of this library
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct Matrix<const ROWS: usize, const COLS: usize> {
     matrix: [[f64; COLS]; ROWS],
 }
 
-///A Matrix with only one column
-type ColumnVector<const SIZE: usize> = Matrix<SIZE, 1>;
+/// A Matrix with only one column
+pub type ColumnVector<const SIZE: usize> = Matrix<SIZE, 1>;
 
 impl<const ROWS: usize, const COLS: usize> Index<(usize, usize)> for Matrix<ROWS, COLS> {
     type Output = f64;
@@ -27,16 +32,16 @@ impl<const ROWS: usize, const COLS: usize> IndexMut<(usize, usize)> for Matrix<R
 }
 
 //From implementation
-///create matrix from 2d arrayq of f64s
+/// Creates matrix from 2d array of `f64`s
 impl<const ROWS: usize, const COLS: usize> From<[[f64; COLS]; ROWS]> for Matrix<ROWS, COLS> {
     fn from(mtx: [[f64; COLS]; ROWS]) -> Self {
         Self { matrix: mtx }
     }
 }
 
-///Performs Matrix-Matrix multiplication
-///The two Matrices must share one COMMON dimension, where one has it for the row number and the other for the
-///column number
+/// Performs `Matrix`-`Matrix` multiplication
+/// The two Matrices must share one COMMON dimension, where one has the COMMON value for the row number and the other `Matrix` has it for the
+/// column number
 impl<const COMMON: usize, const LHSROWS: usize, const RHSCOLS: usize> Mul<Matrix<COMMON, RHSCOLS>>
     for Matrix<LHSROWS, COMMON>
 {
@@ -61,21 +66,21 @@ impl<const COMMON: usize, const LHSROWS: usize, const RHSCOLS: usize> Mul<Matrix
 
 //Matrix Constructors
 impl<const ROWS: usize, const COLS: usize> Matrix<ROWS, COLS> {
-    ///Produce a Matrix of ROWS rows and COLS columns populated with all 0.0s
+    /// Produces a `Matrix` of ROWS rows and COLS columns populated with all 0.0s
     pub fn zero() -> Self {
         Self {
             matrix: [[0.0; COLS]; ROWS],
         }
     }
 
-    ///Produce Matrix of ROWS rows and COLS columns populated with all 1.0s
+    /// Produces a `Matrix` of ROWS rows and COLS columns populated with all 1.0s
     pub fn ones() -> Self {
         Self {
             matrix: [[1.0; COLS]; ROWS],
         }
     }
 
-    ///Construct new matrix using a literal 2d array of f64s input
+    /// Construct new `Matrix` using a literal 2d array of `f64`s as input
     pub fn new(mtx: [[f64; COLS]; ROWS]) -> Self {
         Self { matrix: mtx }
     }
@@ -83,7 +88,7 @@ impl<const ROWS: usize, const COLS: usize> Matrix<ROWS, COLS> {
 
 //For methods requiring square matrices
 impl<const ROWS: usize> Matrix<ROWS, ROWS> {
-    /// Produces an identity Matrix which MUST be square in dimensions
+    /// Produces an identity `Matrix` which MUST be square in dimensions
     pub fn identity() -> Self {
         let mut ret = Self::zero();
         for i in 0..ROWS {
@@ -120,7 +125,7 @@ impl<const ROWS: usize, const COLS: usize> ops::AddAssign<Matrix<ROWS, COLS>>
     }
 }
 
-///Perform vector-scalar multiplication with * operator for Matrices
+/// To enable `Matrix`-scalar multiplication with * operator
 impl<const ROWS: usize, const COLS: usize> ops::Mul<f64> for Matrix<ROWS, COLS> {
     type Output = Matrix<ROWS, COLS>;
     fn mul(self, rhs: f64) -> Self::Output {
@@ -133,18 +138,19 @@ impl<const ROWS: usize, const COLS: usize> ops::Mul<f64> for Matrix<ROWS, COLS> 
 }
 
 #[derive(Debug)]
+/// Represents a coordinate in 3D space. It is composed of a [`ColumnVector`] of size 3, and a [`Vec`<[`Coordinate3d`]>] to record its edges.
 pub struct Coordinate3d {
     pos: ColumnVector<3>,
     edges: Vec<Coordinate3d>,
 }
 
 impl Coordinate3d {
-    ///Translates a coordinate by a vector quantity
+    /// Translates a `Coordinate3d` by a `ColumnVector` quantity
     fn translate(&mut self, vector: ColumnVector<3>) {
         self.pos += vector;
     }
 
-    ///Calculates the distance between two Coordinate3d's
+    /// Calculates the distance between two `Coordinate3d`'s
     fn distance(self, cord: Coordinate3d) -> f64 {
         //pythagorean theorem
         //sqrt((x1 + x2)^2 + (y1 + y2)^2 + (z1 + z2)^2)
@@ -153,24 +159,23 @@ impl Coordinate3d {
             ans += (self.pos[(axis, 1)] + cord.pos[(axis, 1)]).powi(2);
         }
 
-        ans = ans.sqrt();
-        ans
+        ans.sqrt()
     }
 }
 
 #[derive(Debug)]
-///A collection of verticies (which have edges) and an arbitrary origin, used to represent 3D models
+/// A collection of `Coordinate3d` verticies (which have edges), and an arbitrary origin. Used to represent 3D wireframe models
 pub struct Mesh {
     vertices: Vec<Coordinate3d>,
     origin: Coordinate3d,
 }
 
 impl Mesh {
-    ///Translate a mesh by a vector quantity. This function is implemented by calling
-    ///Coordinate3d::translate for each vertex in the mesh.
+    /// Translate a mesh by a vector quantity. This function is implemented by calling
+    /// Coordinate3d::translate for each vertex in the mesh.
     pub fn translate(&mut self, vector: ColumnVector<3>) {
         for vertex in self.vertices.iter_mut() {
-            vertex.translate(vector.clone()); //TODO: avoid clone() by implementing + by reference.
+            vertex.translate(vector);
         }
     }
 }
